@@ -1,17 +1,12 @@
-import type {
-  Client,
-  LibsqlError,
-  InStatement,
-  Config as LibSQLConfig,
-} from "@libsql/client";
 import * as libSql from "@libsql/client";
+import type * as libSqlTypes from "@libsql/client";
 
 import type { Params } from "./types";
 import { cleanArguments, dbErrorHandler, getFullQueryString } from "./util";
 
-interface Config extends LibSQLConfig {
+interface Config extends libSqlTypes.Config {
   /** When a query fails, rather than throwing an exception, you will receive the error via this callback */
-  onQueryError?: (err: LibsqlError) => void;
+  onQueryError?: (err: string) => void;
 
   /** When a query is logged using `logQuery: true`, you will receive the full query strin via this callback */
   onQueryLog?: (query: string) => void;
@@ -24,18 +19,22 @@ interface Config extends LibSQLConfig {
 function createClient(config: Config) {
   const client = libSql.createClient(config);
 
-  const executeMultiple = (...args: Params<Client["executeMultiple"]>) => {
+  const executeMultiple = (
+    ...args: Params<libSqlTypes.Client["executeMultiple"]>
+  ) => {
     return dbErrorHandler(
       () => client.executeMultiple(...args),
       config.onQueryError
     );
   };
 
-  const batch = async (...args: Params<Client["batch"]>) => {
+  const batch = async (...args: Params<libSqlTypes.Client["batch"]>) => {
     return dbErrorHandler(() => client.batch(...args), config.onQueryError);
   };
 
-  const execute = async (params: InStatement & { logQuery?: boolean }) => {
+  const execute = async (
+    params: libSqlTypes.InStatement & { logQuery?: boolean }
+  ) => {
     if (params.logQuery) {
       const fullQueryString = getFullQueryString(params);
       config.onQueryLog?.(fullQueryString);
@@ -59,5 +58,5 @@ function createClient(config: Config) {
 }
 
 export * from "./util";
-
-export { libSql, createClient };
+export * from "@libsql/client";
+export { createClient };

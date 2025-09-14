@@ -137,7 +137,7 @@ export const dbErrorHandler = async <T>(
     return res;
   } catch (err) {
     if (err instanceof LibsqlError) {
-      onError?.(err);
+      onError?.(err.message);
       return null;
     }
 
