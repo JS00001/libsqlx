@@ -1,6 +1,6 @@
 {
   "name": "libsqlx",
-  "description": "A lightweight wrapper around libSQL that adds developer-friendly features like smarter error handling, automatic query logging, visualization, and more",
+  "description": "A lightweight wrapper around libSQL that adds developer-friendly features like smarter error handling, automatic query logging, SQL utilities, and more",
   "version": "1.0.1",
   "main": "lib/src/index.js",
   "scripts": {

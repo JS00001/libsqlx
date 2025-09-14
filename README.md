@@ -1,4 +1,4 @@
-<h1 align="center">libSQLx</h1>
+<h1 align="center">🏖️ libSQLx</h1>
 <p align="center">
   A lightweight wrapper around <a href="https://libsql.org">libSQL</a>
  that adds developer-friendly features like smarter error handling, automatic query logging, visualization, and noise-free logging. Perfect for debugging, monitoring, and improving developer experience when working with libSQL.
