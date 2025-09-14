@@ -1,4 +1,4 @@
-import type { InStatement } from "@libsql/client";
+import { LibsqlError, type InStatement } from "@libsql/client";
 
 const NEWLINE_CHAR = "\t";
 
@@ -63,8 +63,7 @@ export const Jsonify = <T extends Record<string, any> = Record<string, any>>(
  */
 export const getFullQueryString = (params: InStatement) => {
   if (typeof params === "string") {
-    console.log(params);
-    return;
+    return params;
   }
 
   let queryString = params.sql;
@@ -73,11 +72,14 @@ export const getFullQueryString = (params: InStatement) => {
     queryString = queryString.replace(`:${key}`, `'${value}'`);
   }
 
+  let fullString = "";
   const lines = queryString.split(NEWLINE_CHAR);
   for (const line of lines) {
     if (!line.trim()) continue;
-    console.log(line);
+    fullString += `${line}\n`;
   }
+
+  return fullString;
 };
 
 /**
@@ -121,4 +123,24 @@ export const cleanArguments = (sql: string, args: Record<string, any>) => {
   }
 
   return args;
+};
+
+/**
+ * Gracefully handle database errors
+ */
+export const dbErrorHandler = async <T>(
+  fn: () => T,
+  onError?: (err: any) => void
+): Promise<T | null> => {
+  try {
+    const res = await fn();
+    return res;
+  } catch (err) {
+    if (err instanceof LibsqlError) {
+      onError?.(err);
+      return null;
+    }
+
+    throw err;
+  }
 };
