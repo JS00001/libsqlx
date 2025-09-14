@@ -16,7 +16,8 @@
   "author": "JS00001",
   "license": "ISC",
   "dependencies": {
-    "@libsql/client": "^0.15.15"
+    "@libsql/client": "^0.15.15",
+    "commander": "^14.0.1"
   },
   "devDependencies": {
     "typescript": "^5.9.2"
