@@ -1,6 +1,6 @@
 {
   "name": "libsqlx",
-  "description": "",
+  "description": "A lightweight wrapper around libSQL that adds developer-friendly features like smarter error handling, automatic query logging, visualization, and more",
   "version": "1.0.1",
   "main": "lib/src/index.js",
   "scripts": {
@@ -15,7 +15,9 @@
   ],
   "author": "JS00001",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "@libsql/client": "^0.15.15"
+  },
   "devDependencies": {
     "typescript": "^5.9.2"
   },
