@@ -1,6 +1,6 @@
 <h1 align="center">🏖️ libSQLx</h1>
 <p align="center">
-  A lightweight wrapper around <a href="https://libsql.org">libSQL</a>
+  A lightweight wrapper around <a href="https://libsql.org">@libsql/client</a>
  that adds developer-friendly features like smarter error handling, automatic query logging, visualization, and noise-free logging. Perfect for debugging, monitoring, and improving developer experience when working with libSQL.
 </p>
 
@@ -131,7 +131,7 @@ await db.execute({
 
 libSQLx provides a few utility functions to make working with libSQL a little easier.
 
-#### queryString
+#### `queryString`
 
 Returns a single string for SQL queries, allowing for better formatting and readability.
 
@@ -152,7 +152,7 @@ await db.execute({
 ("SELECT * FROM users WHERE id = :id");
 ```
 
-#### paramterize
+#### `paramterize`
 
 Takes an array of values and returns an object with its sql placeholder names, and its prepared arguments. Perfect for `IN (...)` queries.
 
@@ -167,7 +167,7 @@ await db.execute({
 });
 ```
 
-#### Jsonify
+#### `Jsonify`
 
 Similar to parsing row results using `String()`, `Number()`, `Date()`, etc. This function will parse a column as JSON, where it is either parsed as an object, or as null
 
@@ -184,7 +184,7 @@ return results.map((result) => ({
 }));
 ```
 
-#### sanitizeLike
+#### `sanitizeLike`
 
 When using `LIKE` in a SQL query, you need to pass the wildcards as a part of the parameter. This function will sanitize the parameter to escape any other wildcards from the string.
 
@@ -197,7 +197,7 @@ await db.execute({
 });
 ```
 
-#### sanitizeSqlPath
+#### `sanitizeSqlPath`
 
 JSON paths cannot be parameterized in SQL, so this function will sanitize a string to remove characters that would break the path, or allow for SQL injection. The only
 characters allowed are alphanumeric characters and underscores.
