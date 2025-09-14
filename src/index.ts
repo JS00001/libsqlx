@@ -10,13 +10,17 @@ import type { Params } from "./types";
 import { cleanArguments, dbErrorHandler, getFullQueryString } from "./util";
 
 interface Config extends LibSQLConfig {
-  /** Callback for when a query fails, rather than throwing an exception */
+  /** When a query fails, rather than throwing an exception, you will receive the error via this callback */
   onQueryError?: (err: LibsqlError) => void;
 
-  /** When a query is logged, run this callback */
+  /** When a query is logged using `logQuery: true`, you will receive the full query strin via this callback */
   onQueryLog?: (query: string) => void;
 }
 
+/**
+ * Creates a Client object
+ * You must pass at least an url in the Config object.
+ */
 function createClient(config: Config) {
   const client = libSql.createClient(config);
 
@@ -51,13 +55,9 @@ function createClient(config: Config) {
     return dbErrorHandler(() => client.execute(params), config.onQueryError);
   };
 
-  return {
-    ...client,
-    execute,
-    executeMultiple,
-    batch,
-  };
+  return { ...client, execute, executeMultiple, batch };
 }
 
-export type * from "./types";
+export * from "./util";
+
 export { libSql, createClient };
