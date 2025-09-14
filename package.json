@@ -1,7 +1,7 @@
 {
   "name": "libsqlx",
   "description": "A lightweight wrapper around @libsql/client that adds developer-friendly features like smarter error handling, automatic query logging, SQL utilities, and more",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc",

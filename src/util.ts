@@ -43,9 +43,7 @@ export const paramterize = (key: string, value: Array<string | number>) => {
  *
  * @returns A parsed object, or null
  */
-export const Jsonify = <T extends Record<string, any> = Record<string, any>>(
-  value: string
-) => {
+export const Jsonify = <T extends Record<string, any> = Record<string, any>>(value: string) => {
   try {
     return JSON.parse(value) as T;
   } catch (err) {
@@ -126,16 +124,15 @@ export const cleanArguments = (sql: string, args: Record<string, any>) => {
 };
 
 /**
- * Gracefully handle database errors
+ * Gracefully handle database errors. If the error is not a libSQL error, it will still
+ * be thrown
  */
-export const dbErrorHandler = async <T>(
-  fn: () => T,
-  onError?: (err: any) => void
-): Promise<T | null> => {
+export const dbErrorHandler = async <T>(fn: () => T, onError?: (err: string) => void): Promise<T | null> => {
   try {
     const res = await fn();
     return res;
   } catch (err) {
+    // Specifically handle libsql errors,
     if (err instanceof LibsqlError) {
       onError?.(err.message);
       return null;
