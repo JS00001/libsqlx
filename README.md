@@ -9,15 +9,15 @@
 - [Install](#install) - Get started using libSQLx
 - [Quickstart](#quickstart) - A simple example of how to use libSQLx
 - [Features](#features) - The features of libSQLx
-  - [Query Logging](#query-logging)
-  - [Error Handling](#error-handling)
-  - [Argument Cleaning](#argument-cleaning)
-  - [Utility Functions](#utility-functions)
-    - [queryString](#querystring)
-    - [paramterize](#paramterize)
-    - [Jsonify](#jsonify)
-    - [sanitizeLike](#sanitizelike)
-    - [sanitizeSqlPath](#sanitizesqlpath)
+  - [Query Logging](#query-logging) - Logging queries and their parameters
+  - [Error Handling](#error-handling) - Catching and handling errors
+  - [Argument Cleaning](#argument-cleaning) - Removing unused arguments
+  - [Utility Functions](#utility-functions) - Making working with libSQL easier
+    - [queryString](#querystring) - Join a list of strings into a single string
+    - [paramterize](#paramterize) - Take a list and return an object with its sql placeholder names
+    - [Jsonify](#jsonify) - Convert a string to a JSON object
+    - [sanitizeLike](#sanitizelike) - Sanitize a string to remove characters that would break glob patterns
+    - [sanitizeSqlPath](#sanitizesqlpath) - Fully sanitize a string down to only alphanumeric characters
 
 ## Install
 
