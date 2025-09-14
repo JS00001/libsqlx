@@ -4,6 +4,21 @@
  that adds developer-friendly features like smarter error handling, automatic query logging, visualization, and noise-free logging. Perfect for debugging, monitoring, and improving developer experience when working with libSQL.
 </p>
 
+## Table of Contents
+
+- [Install](#install) - Get started using libSQLx
+- [Quickstart](#quickstart) - A simple example of how to use libSQLx
+- [Features](#features) - The features of libSQLx
+  - [Query Logging](#query-logging)
+  - [Error Handling](#error-handling)
+  - [Argument Cleaning](#argument-cleaning)
+  - [Utility Functions](#utility-functions)
+    - [queryString](#querystring)
+    - [paramterize](#paramterize)
+    - [Jsonify](#jsonify)
+    - [sanitizeLike](#sanitizelike)
+    - [sanitizeSqlPath](#sanitizesqlpath)
+
 ## Install
 
 ```bash
