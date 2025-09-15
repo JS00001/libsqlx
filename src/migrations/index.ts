@@ -31,6 +31,8 @@ export function libSqlMigrationCli(props: CliCommandOptions) {
         process.exit(1);
       }
 
-      New(props);
+      New({ ...props, name: options.name });
     });
+
+  program.parse(process.argv);
 }

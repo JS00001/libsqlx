@@ -12,7 +12,13 @@ interface Config extends libSqlTypes.Config {
   onQueryLog?: (query: string) => void;
 }
 
-export function createClient(config: Config) {
+export interface LibsqlxClient extends Omit<libSqlTypes.Client, "execute" | "executeMultiple" | "batch"> {
+  executeMultiple: (sql: string) => Promise<void | null>;
+  execute: (params: libSql.InStatement) => Promise<libSql.ResultSet | null>;
+  batch: (...params: Params<libSqlTypes.Client["batch"]>) => Promise<libSql.ResultSet[] | null>;
+}
+
+export function createClient(config: Config): LibsqlxClient {
   const client = libSql.createClient(config);
 
   /**
@@ -21,7 +27,7 @@ export function createClient(config: Config) {
    * We do not wrap the statements in a transaction, but the SQL can contain explicit transaction-control statements such as BEGIN and COMMIT.
    * This method is intended to be used with existing SQL scripts, such as migrations or small database dumps. If you want to execute a sequence of statements programmatically, please use batch instead.
    */
-  const executeMultiple = (...args: Params<libSqlTypes.Client["executeMultiple"]>) => {
+  const executeMultiple = async (...args: Params<libSqlTypes.Client["executeMultiple"]>) => {
     return dbErrorHandler(() => client.executeMultiple(...args), config.onQueryError);
   };
 

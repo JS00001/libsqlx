@@ -1,6 +1,32 @@
-import { createClient } from "../../client";
-import { CliCommandOptions } from "../types";
+import { mkdir, writeFile } from "fs/promises";
 
-export default function New({ url, authToken }: CliCommandOptions) {
-  const db = createClient({ url, authToken });
+import { CliCommandOptions } from "../types";
+import { logError, logSuccess } from "../util";
+
+interface NewCommandOptions extends CliCommandOptions {
+  name: string;
+}
+
+export default async function New({ name, migrationPath }: NewCommandOptions) {
+  const epochTime = Date.now();
+  const fileName = `${epochTime}_${name}.ts`;
+
+  const fileContents = `
+  import type { LibsqlxClient } from 'libsqlx';
+
+  export default class Migration_${epochTime}_${name} {
+    public static async up(db: LibsqlxClient) {
+      // Add your migration logic here
+    }
+
+    public static async down(db: LibsqlxClient) {
+      // Add your rollback logic here
+    }
+  }
+  `;
+
+  await mkdir(migrationPath, { recursive: true }).catch((e) => logError(e.message));
+  await writeFile(`${migrationPath}/${fileName}`, fileContents).catch((e) => logError(e.message));
+
+  logSuccess(`Created migration ${fileName}`);
 }
