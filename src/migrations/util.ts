@@ -1,18 +1,16 @@
-export const RESET = "\x1b[0m";
-export const BOLD = "\x1b[1m";
-export const UNDER = "\x1b[4m";
+import fs from "fs/promises";
 
-export const BLACK = "\x1b[30m";
-export const RED = "\x1b[31m";
-export const GREEN = "\x1b[32m";
-export const YELLOW = "\x1b[33m";
-export const BLUE = "\x1b[34m";
-export const MAGENTA = "\x1b[35m";
-export const CYAN = "\x1b[36m";
-export const WHITE = "\x1b[37m";
+import { LibsqlxClient } from "../client";
+import { queryString } from "../client/util";
 
-export const CHECK = "✔";
-export const CROSS = "✖";
+const RESET = "\x1b[0m";
+const RED = "\x1b[31m";
+const GREEN = "\x1b[32m";
+const YELLOW = "\x1b[33m";
+
+const CHECK = "✔";
+const CROSS = "✖";
+const WARN = "⚠";
 
 export const logSuccess = (message: string) => {
   console.log(`${GREEN}${CHECK}${RESET} ${message}`);
@@ -20,4 +18,29 @@ export const logSuccess = (message: string) => {
 
 export const logError = (message: string) => {
   console.log(`${RED}${CROSS}${RESET} ${message}`);
+};
+
+export const logWarn = (message: string) => {
+  console.log(`${YELLOW}${WARN}${RESET} ${message}`);
+};
+
+export const createMigrationTableIfNotExists = (db: LibsqlxClient, migrationTable: string = "migrations") => {
+  return db.execute({
+    sql: queryString(
+      "CREATE TABLE IF NOT EXISTS " + migrationTable + "(",
+      "  id INTEGER PRIMARY KEY AUTOINCREMENT,",
+      "  filepath TEXT,",
+      "  timestamp INTEGER",
+      ")"
+    ),
+  });
+};
+
+export const validateMigrationDirectory = async (migrationPath: string) => {
+  try {
+    await fs.access(migrationPath);
+  } catch (e) {
+    logError("Unable to find the migration directory. Make sure it exists");
+    process.exit(0);
+  }
 };

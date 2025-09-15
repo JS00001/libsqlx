@@ -1,7 +1,7 @@
 <h1 align="center">🏖️ libSQLx</h1>
 <p align="center">
   A lightweight wrapper around <a href="https://libsql.org">@libsql/client</a>
- that adds developer-friendly features like smarter error handling, automatic query logging, visualization, and noise-free logging. Perfect for debugging, monitoring, and improving developer experience when working with libSQL.
+ that adds developer-friendly features like migrations, smarter error handling, query logging, sanitization, and more. Perfect for debugging, monitoring, and improving developer experience when working with libSQL.
 </p>
 
 ## Table of Contents
@@ -9,6 +9,7 @@
 - [Install](#install) - Get started using libSQLx
 - [Quickstart](#quickstart) - A simple example of how to use libSQLx
 - [Features](#features) - The features of libSQLx
+  - [Migrations](#migrations) - Managing database migrations
   - [Query Logging](#query-logging) - Logging queries and their parameters
   - [Error Handling](#error-handling) - Catching and handling errors
   - [Argument Cleaning](#argument-cleaning) - Removing unused arguments
@@ -62,6 +63,40 @@ await db.execute({
 ```
 
 ## Features
+
+### Migrations
+
+libSQLx provides a simple way to manage database migrations. It can be used to apply changes to a database, and to rollback changes if needed. You can use migrations in any way you'd like, but we recommend setting up a `migrations` folder.
+
+1. Create a `migrations/index.ts` file in your project
+2. Adding the following to your `migrations/index.ts` file will allow you to use the libSQLx migration cli.
+
+````ts
+import { libSqlMigrationCli } from "libsqlx";
+
+libSqlMigrationCli({
+  migrationPath: __dirname + "/migrations",
+  url: "https://db.example.com",
+  authToken: "optional auth token",
+})
+```
+
+3. The simplest way to install migrations is to install `tsx` as a dev dependency, and add the following to your `package.json`
+```json
+{
+  "scripts": {
+    "migrate": "tsx src/migrations/index.ts",
+  }
+}
+````
+
+4. To create a new migration, run `npm run migrate new --name "create_users_table"`
+
+5. To run migrations, run `npm run migrate up`
+
+6. To rollback migrations, run `npm run migrate down`
+
+Thats it!
 
 ### Query Logging
 
@@ -154,12 +189,7 @@ Returns a single string for SQL queries, allowing for better formatting and read
 import { queryString } from "libsqlx";
 
 await db.execute({
-  sql: queryString(
-    "SELECT firstName, lastName",
-    "FROM users",
-    "WHERE id = :id",
-    "  AND email = :email"
-  ),
+  sql: queryString("SELECT firstName, lastName", "FROM users", "WHERE id = :id", "  AND email = :email"),
   args: { id: 1, email: "johndoe@gmail.com" },
 });
 
@@ -223,7 +253,5 @@ import { sanitizeSqlPath } from "libsqlx";
 const userInputtedValue = "foo';--bar";
 const sanitizedPath = sanitizeSqlPath(userInputtedValue);
 
-await db.execute(
-  `SELECT * FROM users WHERE JSON_EXTRACT(metadata, '$.${sanitizedPath}') IS NOT NULL`
-);
+await db.execute(`SELECT * FROM users WHERE JSON_EXTRACT(metadata, '$.${sanitizedPath}') IS NOT NULL`);
 ```

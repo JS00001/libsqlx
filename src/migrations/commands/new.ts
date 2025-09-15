@@ -12,17 +12,17 @@ export default async function New({ name, migrationPath }: NewCommandOptions) {
   const fileName = `${epochTime}_${name}.ts`;
 
   const fileContents = `
-  import type { LibsqlxClient } from 'libsqlx';
+import type { LibsqlxClient } from 'libsqlx';
 
-  export default class Migration_${epochTime}_${name} {
-    public static async up(db: LibsqlxClient) {
-      // Add your migration logic here
-    }
-
-    public static async down(db: LibsqlxClient) {
-      // Add your rollback logic here
-    }
+export default class Migration_${epochTime}_${name} {
+  public static async up(db: LibsqlxClient) {
+    // Add your migration logic here
   }
+
+  public static async down(db: LibsqlxClient) {
+    // Add your rollback logic here
+  }
+}
   `;
 
   await mkdir(migrationPath, { recursive: true }).catch((e) => logError(e.message));

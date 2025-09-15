@@ -8,6 +8,8 @@ import { CliCommandOptions } from "./types";
 import packageJSON from "../../package.json";
 
 export function libSqlMigrationCli(props: CliCommandOptions) {
+  props.migrationTable = props.migrationTable ?? "migrations";
+
   const program = new Command();
 
   program.name("migrate").description("Migration CLI").version(packageJSON.version);
