@@ -1,5 +1,7 @@
 import { LibsqlError, type InStatement } from "@libsql/client";
 
+import { LibsqlxConfig } from "../types";
+
 const NEWLINE_CHAR = "\t";
 
 /**
@@ -127,14 +129,26 @@ export const cleanArguments = (sql: string, args: Record<string, any>) => {
  * Gracefully handle database errors. If the error is not a libSQL error, it will still
  * be thrown
  */
-export const dbErrorHandler = async <T>(fn: () => T, onError?: (err: string) => void): Promise<T | null> => {
+export const queryHandler = async <T>(fn: () => T, config: LibsqlxConfig): Promise<T | null> => {
   try {
-    const res = await fn();
-    return res;
+    if (!config.timeQueries) {
+      const result = await fn();
+      config.onQueryFinish?.({ time: 0 });
+      return result;
+    }
+
+    const startTime = process.hrtime();
+    const result = await fn();
+    const endTime = process.hrtime(startTime);
+    const timeMs = endTime[0] * 1000 + endTime[1] / 1000000;
+
+    config.onQueryFinish?.({ time: timeMs });
+
+    return result;
   } catch (err) {
     // Specifically handle libsql errors,
     if (err instanceof LibsqlError) {
-      onError?.(err.message);
+      config.onQueryError?.(err.message);
       return null;
     }
 

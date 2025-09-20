@@ -1,24 +1,10 @@
 import * as libSql from "@libsql/client";
 import type * as libSqlTypes from "@libsql/client";
 
-import type { Params } from "../types";
-import { cleanArguments, dbErrorHandler, getFullQueryString } from "./util";
+import type { LibsqlxClient, LibsqlxConfig, Params } from "../types";
+import { cleanArguments, queryHandler, getFullQueryString } from "./util";
 
-interface Config extends libSqlTypes.Config {
-  /** When a query fails, rather than throwing an exception, you will receive the error via this callback */
-  onQueryError?: (err: string) => void;
-
-  /** When a query is logged using `logQuery: true`, you will receive the full query string via this callback */
-  onQueryLog?: (query: string) => void;
-}
-
-export interface LibsqlxClient extends Omit<libSqlTypes.Client, "execute" | "executeMultiple" | "batch"> {
-  executeMultiple: (sql: string) => Promise<void | null>;
-  execute: (params: libSql.InStatement) => Promise<libSql.ResultSet | null>;
-  batch: (...params: Params<libSqlTypes.Client["batch"]>) => Promise<libSql.ResultSet[] | null>;
-}
-
-export function createClient(config: Config): LibsqlxClient {
+export function createClient(config: LibsqlxConfig): LibsqlxClient {
   const client = libSql.createClient(config);
 
   /**
@@ -28,7 +14,7 @@ export function createClient(config: Config): LibsqlxClient {
    * This method is intended to be used with existing SQL scripts, such as migrations or small database dumps. If you want to execute a sequence of statements programmatically, please use batch instead.
    */
   const executeMultiple = async (...args: Params<libSqlTypes.Client["executeMultiple"]>) => {
-    return dbErrorHandler(() => client.executeMultiple(...args), config.onQueryError);
+    return queryHandler(() => client.executeMultiple(...args), config);
   };
 
   /**
@@ -39,7 +25,7 @@ export function createClient(config: Config): LibsqlxClient {
    * This method provides non-interactive transactions. If you need interactive transactions, please use the transaction method.
    */
   const batch = async (...args: Params<libSqlTypes.Client["batch"]>) => {
-    return dbErrorHandler(() => client.batch(...args), config.onQueryError);
+    return queryHandler(() => client.batch(...args), config);
   };
 
   /**
@@ -58,10 +44,10 @@ export function createClient(config: Config): LibsqlxClient {
     if (typeof params !== "string") {
       const args = cleanArguments(params.sql, params.args ?? {});
 
-      return dbErrorHandler(() => client.execute({ sql: params.sql, args }), config.onQueryError);
+      return queryHandler(() => client.execute({ sql: params.sql, args }), config);
     }
 
-    return dbErrorHandler(() => client.execute(params), config.onQueryError);
+    return queryHandler(() => client.execute(params), config);
   };
 
   return { ...client, execute, executeMultiple, batch };
