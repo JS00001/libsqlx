@@ -132,7 +132,7 @@ export class LibsqlxJobs {
 
     await this.db.execute({
       sql: queryString(
-        "INSERT INTO " + this.jobsTable,
+        "INSERT OR IGNORE INTO " + this.jobsTable,
         "(name, data, runAt, priority, cron)",
         "VALUES (:name, :data, :runAt, :priority, :cron)"
       ),
@@ -174,7 +174,10 @@ export class LibsqlxJobs {
     await this.db.executeMultiple(
       queryString(
         "CREATE INDEX IF NOT EXISTS idx_" + this.jobsTable + "_priority ON " + this.jobsTable + " (priority);",
-        "CREATE INDEX IF NOT EXISTS idx_" + this.jobsTable + "_status_runAt ON " + this.jobsTable + " (status, runAt);"
+        "CREATE INDEX IF NOT EXISTS idx_" + this.jobsTable + "_status_runAt ON " + this.jobsTable + " (status, runAt);",
+        // Prevent multiple cron jobs from getting scheduled for the same dates
+        // prettier-ignore
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_" + this.jobsTable + "_name_cron_runAt ON " + this.jobsTable + " (name, cron, runAt)"
       )
     );
   }
