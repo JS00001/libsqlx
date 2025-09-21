@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "fs/promises";
 
-import { CliCommandOptions } from "../types";
+import { CliCommandOptions } from "../../types";
 import { logError, logSuccess } from "../util";
 
 interface NewCommandOptions extends CliCommandOptions {

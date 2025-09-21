@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { CliCommandOptions } from "../types";
+import { CliCommandOptions } from "../../types";
 
 import { createClient } from "../../client";
 import { createMigrationTableIfNotExists, logSuccess, logWarn, validateMigrationDirectory } from "../util";

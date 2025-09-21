@@ -1,4 +1,4 @@
-import { CliCommandOptions } from "../types";
+import { CliCommandOptions } from "../../types";
 import { createMigrationTableIfNotExists, logError, logSuccess, validateMigrationDirectory } from "../util";
 
 import { createClient } from "../../client";
