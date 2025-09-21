@@ -4,10 +4,10 @@ import Up from "./commands/up";
 import New from "./commands/new";
 import Down from "./commands/down";
 
-import { CliCommandOptions } from "./types";
+import { CliCommandOptions } from "../types";
 import packageJSON from "../../package.json";
 
-export function libSqlMigrationCli(props: CliCommandOptions) {
+export function createLibsqlxMigrationCli(props: CliCommandOptions) {
   props.migrationTable = props.migrationTable ?? "migrations";
 
   const program = new Command();

@@ -2,6 +2,12 @@ import type * as libSqlTypes from "@libsql/client";
 
 export type Params<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P : never;
 
+export enum JobPriority {
+  Low = 1,
+  Medium = 2,
+  High = 3,
+}
+
 export interface LibsqlxConfig extends libSqlTypes.Config {
   /** Whether to time the length of all queries or not. If true, returns the time as a part of the onQueryFinish callback */
   timeQueries?: boolean;
@@ -26,3 +32,39 @@ export type OnQueryFinishData = {
   /** The amount of time the query took in milliseconds. This will be 0 if `queryTimings: true` is not set */
   time: number;
 };
+
+export interface CliCommandOptions {
+  /** The database URL */
+  url: string;
+
+  /** The path containing the migration files */
+  migrationPath: string;
+
+  /** The auth token to connect to the libSQL database */
+  authToken?: string;
+
+  /** The name of the table to store migrations in. Defaults to "migrations" */
+  migrationTable?: string;
+}
+
+export interface CreateJobsOptions {
+  /** The database URL */
+  url: string;
+
+  /** The name of the table to store jobs in. Defaults to "jobs" */
+  jobsTable?: string;
+
+  /** The auth token to connect to the libSQL database */
+  authToken?: string;
+
+  /** How often to process jobs in milliseconds. Defaults to 5000 */
+  processEvery?: number;
+
+  /** The maximum number of retries for each job. Defaults to 3 */
+  maxRetries?: number;
+}
+
+export interface JobOptions {
+  /** The priority of the job */
+  priority?: number;
+}

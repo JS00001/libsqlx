@@ -3,4 +3,4 @@ export * from "@libsql/client";
 export * from "./types";
 export * from "./client/util";
 export { createClient } from "./client";
-export { libSqlMigrationCli } from "./migrations";
+export { createLibsqlxMigrationCli as libSqlMigrationCli } from "./migrations";

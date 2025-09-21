@@ -1,8 +1,8 @@
 {
   "name": "libsqlx",
   "description": "A lightweight wrapper around @libsql/client that adds developer-friendly features like migrations, error handling, query logging, SQL utilities, and more",
-  "version": "1.0.13",
-  "main": "lib/index.js",
+  "version": "1.0.15",
+  "main": "lib/src/index.js",
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build"
@@ -17,7 +17,9 @@
   "license": "ISC",
   "dependencies": {
     "@libsql/client": "^0.15.15",
-    "commander": "^14.0.1"
+    "chrono-node": "^2.8.4",
+    "commander": "^14.0.1",
+    "cron-parser": "^5.4.0"
   },
   "devDependencies": {
     "tsx": "^4.20.5",
