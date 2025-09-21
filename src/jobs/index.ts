@@ -27,6 +27,7 @@ export class LibsqlxJobs {
     this.db = createClient({
       url: options.url,
       authToken: options.authToken,
+      onQueryError: (err) => console.error(err),
     });
   }
 
@@ -46,15 +47,29 @@ export class LibsqlxJobs {
     return this.options.maxRetries ?? 3;
   }
 
+  /**
+   * Setup tables and start the job worker for libsqlx jobs
+   */
   public async start() {
     await this.setupTables();
     await this.setupJobWorker();
   }
 
   /**
+   * Stop the job worker from listening for jobs
+   */
+  public async stop() {
+    this.isRunning = false;
+  }
+
+  /**
    * Register a job to be run
    */
-  public register<T = any>(name: string, options: JobOptions, fn: (data: T) => void) {
+  public register<T extends Record<string, any> = Record<string, any>>(
+    name: string,
+    options: JobOptions,
+    fn: (data: T) => void
+  ) {
     this.jobsRegistry[name] = { name, options, fn };
   }
 
@@ -62,9 +77,9 @@ export class LibsqlxJobs {
    * Queue a job to run instantly based on its
    * priority
    */
-  public async queue<T = any>(name: string, data?: T) {
+  public async queue<T extends Record<string, any> = Record<string, any>>(name: string, data?: T) {
     const job = this.jobsRegistry[name];
-    if (!job) return;
+    if (!job) return console.error(`Job ${name} does not exist`);
 
     await this.db.execute({
       sql: queryString(
@@ -84,9 +99,9 @@ export class LibsqlxJobs {
    * Schedule a job to run in the future. This can use a date string, or a human-readable string
    * such as 'in 10 minutes' or 'next week'
    */
-  public async schedule<T>(date: string, name: string, data?: T) {
+  public async schedule<T extends Record<string, any> = Record<string, any>>(date: string, name: string, data?: T) {
     const job = this.jobsRegistry[name];
-    if (!job) return;
+    if (!job) return console.error(`Job ${name} does not exist`);
 
     const parsedDate = parseDate(date);
     if (!parsedDate) return;
@@ -109,9 +124,9 @@ export class LibsqlxJobs {
   /**
    * Schedule a job to run every time the cron string is met
    */
-  public async every<T>(cronString: string, name: string, data?: T) {
+  public async every<T extends Record<string, any> = Record<string, any>>(cronString: string, name: string, data?: T) {
     const job = this.jobsRegistry[name];
-    if (!job) return;
+    if (!job) return console.error(`Job ${name} does not exist`);
 
     const interval = parser.parse(cronString);
     const runAt = interval.next().toDate();
@@ -150,8 +165,8 @@ export class LibsqlxJobs {
         "  priority INTEGER DEFAULT 0,",
         "  cron TEXT,",
         "  attempts INTEGER DEFAULT 0,",
-        "  status TEXT CHECK (status IN ( " + jobStatuses + ")) DEFAULT '" + JobStatus.Pending + "'",
-        "  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP",
+        "  status TEXT CHECK (status IN ( " + jobStatuses + ")) DEFAULT '" + JobStatus.Pending + "',",
+        "  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,",
         "  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP",
         ")"
       )
@@ -169,15 +184,17 @@ export class LibsqlxJobs {
    * Sets up the jobs worker to run automatically
    */
   private async setupJobWorker() {
-    if (this.isRunning) return false;
+    if (this.isRunning) return;
     this.isRunning = true;
 
     const loop = async () => {
+      if (!this.isRunning) return;
+
       try {
         if (this.activeJobs < this.maxJobs) {
           const limit = this.maxJobs - this.activeJobs;
 
-          const res = await this.db.execute({
+          const result = await this.db.execute({
             sql: queryString(
               "SELECT *",
               "FROM " + this.jobsTable,
@@ -191,7 +208,7 @@ export class LibsqlxJobs {
             },
           });
 
-          const rows = res?.rows ?? [];
+          const rows = result?.rows ?? [];
 
           for (const row of rows) {
             this.activeJobs++;
@@ -219,7 +236,7 @@ export class LibsqlxJobs {
     const data = row["data"] ? Jsonify(String(row["data"])) : null;
 
     const job = this.jobsRegistry[name];
-    if (!job) return;
+    if (!job) return console.error(`Job ${name} does not exist`);
 
     await this.db.execute({
       sql: queryString(
@@ -257,11 +274,11 @@ export class LibsqlxJobs {
             "VALUES (:name, :data, :runAt, :priority, :cron)"
           ),
           args: {
+            cron,
             name: job.name,
             priority: job.options.priority ?? 0,
             data: data ? JSON.stringify(data) : null,
             runAt: toSqliteDateString(nextRun),
-            cron,
           },
         });
       }

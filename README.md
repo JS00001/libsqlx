@@ -10,6 +10,7 @@
 - [Quickstart](#quickstart) - A simple example of how to use libSQLx
 - [Features](#features) - The features of libSQLx
   - [Migrations](#migrations) - Managing database migrations
+  - [Job Queuing](#job-queuing) - Scheduling and running jobs
   - [Query Logging](#query-logging) - Logging queries and their parameters
   - [Error Handling](#error-handling) - Catching and handling errors
   - [Argument Cleaning](#argument-cleaning) - Removing unused arguments
@@ -97,6 +98,50 @@ createLibsqlxMigrationCli({
 6. To rollback migrations, run `npm run migrate down`
 
 Thats it!
+
+### Job Queuing
+
+libSQLx provides a simple way to schedule and run jobs. libsqlX provides three ways of queueing and running jobs: `jobs.schedule(...)`, `jobs.queue(...)`, and `jobs.every(...)`.
+
+To get started, start by creating a new instance of the `LibsqlxJobs` class.
+
+```ts
+import { LibsqlxJobs } from "libsqlx";
+
+const jobs = new LibsqlxJobs({
+  url: "https://db.libsql.com",
+  authToken: process.env.AUTH_TOKEN,
+  // The name of the table to use for jobs
+  jobsTable: "jobs",
+  // The number of milliseconds to wait between job checks
+  processEvery: 1000,
+  // The maximum number of times to retry a job before marking it as failed
+  maxRetries: 3,
+  // The maximum number of jobs to run at once
+  maxJobs: 10
+})
+```
+
+Once you have a new instance of the `LibsqlxJobs` class, you can start the job worker, and register jobs to be run.
+
+```ts
+// You must call `start` to start the job worker
+await jobs.start();
+
+// Register a job with the name `job_name`
+jobs.register("job_name", (data) => {
+  console.log(data);
+});
+
+// Add the 'job_name' job to the queue
+jobs.queue("job_name", { message: "Hello world" });
+
+// Schedule the job to run in 1 minute
+jobs.schedule("in 1 minute", "job_name", { message: "Hello world" });
+
+// schedule the job to run every minute
+jobs.every("* * * * *", "job_name", { message: "Hello world" });
+```
 
 ### Query Logging
 
