@@ -8,6 +8,13 @@ export enum JobPriority {
   High = 3,
 }
 
+export enum JobStatus {
+  Pending = "pending",
+  Running = "running",
+  Failed = "failed",
+  Completed = "completed",
+}
+
 export interface LibsqlxConfig extends libSqlTypes.Config {
   /** Whether to time the length of all queries or not. If true, returns the time as a part of the onQueryFinish callback */
   timeQueries?: boolean;
@@ -62,6 +69,9 @@ export interface CreateJobsOptions {
 
   /** The maximum number of retries for each job. Defaults to 3 */
   maxRetries?: number;
+
+  /** The maximum number of jobs to execute at once. Defaults to 10 */
+  maxJobs?: number;
 }
 
 export interface JobOptions {
