@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 
-import { LibsqlxClient } from "../client";
+import { LibsqlxClient } from "../types";
 import { queryString } from "../client/util";
 
 const RESET = "\x1b[0m";
