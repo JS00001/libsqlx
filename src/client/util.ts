@@ -155,3 +155,10 @@ export const queryHandler = async <T>(fn: () => T, config: LibsqlxConfig): Promi
     throw err;
   }
 };
+
+/**
+ * Converts a date to the standard sqlite date format `YYYY-MM-DD HH:MM:SS`
+ */
+export const toSqliteDateString = (date: Date) => {
+  return date.toISOString().slice(0, 19).replace("T", " ");
+};

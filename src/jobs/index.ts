@@ -3,8 +3,7 @@ import { Row } from "@libsql/client";
 import { parseDate } from "chrono-node";
 
 import { createClient } from "../client";
-import { toSqliteDateString } from "./util";
-import { Jsonify, queryString } from "../client/util";
+import { Jsonify, queryString, toSqliteDateString } from "../client/util";
 import { CreateJobsOptions, JobOptions, JobStatus, LibsqlxClient } from "../types";
 
 interface JobRegistryValue {
