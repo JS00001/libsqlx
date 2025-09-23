@@ -31,7 +31,7 @@ export interface LibsqlxConfig extends libSqlTypes.Config {
 
 export interface LibsqlxClient extends Omit<libSqlTypes.Client, "execute" | "executeMultiple" | "batch"> {
   executeMultiple: (sql: string) => Promise<void | null>;
-  execute: (params: libSqlTypes.InStatement) => Promise<libSqlTypes.ResultSet | null>;
+  execute: (params: libSqlTypes.InStatement & { logQuery?: boolean }) => Promise<libSqlTypes.ResultSet | null>;
   batch: (...params: Params<libSqlTypes.Client["batch"]>) => Promise<libSqlTypes.ResultSet[] | null>;
 }
 
