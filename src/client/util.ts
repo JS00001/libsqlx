@@ -158,7 +158,15 @@ export const queryHandler = async <T>(fn: () => T, config: LibsqlxConfig): Promi
 
 /**
  * Converts a date to the standard sqlite date format `YYYY-MM-DD HH:MM:SS`
+ * Also converts timezone to UTC
  */
 export const toSqliteDateString = (date: Date) => {
-  return date.toISOString().slice(0, 19).replace("T", " ");
+  const yyyy = date.getUTCFullYear();
+  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(date.getUTCDate()).padStart(2, "0");
+  const hh = String(date.getUTCHours()).padStart(2, "0");
+  const min = String(date.getUTCMinutes()).padStart(2, "0");
+  const ss = String(date.getUTCSeconds()).padStart(2, "0");
+
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 };
