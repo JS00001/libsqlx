@@ -69,7 +69,7 @@ export const getFullQueryString = (params: InStatement) => {
   let queryString = params.sql;
 
   for (const [key, value] of Object.entries(params.args ?? {})) {
-    queryString = queryString.replace(`:${key}`, `'${value}'`);
+    queryString = queryString.replaceAll(`:${key}`, `'${value}'`);
   }
 
   let fullString = "";
