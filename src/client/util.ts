@@ -45,7 +45,7 @@ export const paramterize = (key: string, value: Array<string | number>) => {
  *
  * @returns A parsed object, or null
  */
-export const Jsonify = <T extends Record<string, any> = Record<string, any>>(value: string) => {
+export const Jsonify = <T extends Record<string, any> | Array<any> = Record<string, any>>(value: string) => {
   try {
     return JSON.parse(value) as T;
   } catch (err) {
@@ -160,7 +160,11 @@ export const queryHandler = async <T>(fn: () => T, config: LibsqlxConfig): Promi
  * Converts a date to the standard sqlite date format `YYYY-MM-DD HH:MM:SS`
  * Also converts timezone to UTC
  */
-export const toSqliteDateString = (date: Date) => {
+export const toSqliteDateString = (date: Date | string) => {
+  if (typeof date === "string") {
+    date = new Date(date);
+  }
+
   const yyyy = date.getUTCFullYear();
   const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
   const dd = String(date.getUTCDate()).padStart(2, "0");
