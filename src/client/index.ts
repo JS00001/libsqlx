@@ -5,7 +5,11 @@ import type { LibsqlxClient, LibsqlxConfig, Params } from "../types";
 import { cleanArguments, queryHandler, getFullQueryString } from "./util";
 
 export function createClient(config: LibsqlxConfig): LibsqlxClient {
-  const client = libSql.createClient(config);
+  const client = libSql.createClient(config) as LibsqlxClient;
+
+  const executeMultiple = client.executeMultiple.bind(client);
+  const execute = client.execute.bind(client);
+  const batch = client.batch.bind(client);
 
   /**
    * Execute a sequence of SQL statements separated by semicolons.
@@ -13,8 +17,8 @@ export function createClient(config: LibsqlxConfig): LibsqlxClient {
    * We do not wrap the statements in a transaction, but the SQL can contain explicit transaction-control statements such as BEGIN and COMMIT.
    * This method is intended to be used with existing SQL scripts, such as migrations or small database dumps. If you want to execute a sequence of statements programmatically, please use batch instead.
    */
-  const executeMultiple = async (...args: Params<libSqlTypes.Client["executeMultiple"]>) => {
-    return queryHandler(() => client.executeMultiple(...args), config);
+  client.executeMultiple = async (...args: Params<libSqlTypes.Client["executeMultiple"]>) => {
+    return queryHandler(() => executeMultiple(...args), config);
   };
 
   /**
@@ -24,8 +28,8 @@ export function createClient(config: LibsqlxConfig): LibsqlxClient {
    * If any of the statements in the batch fails with an error, the batch is aborted, the transaction is rolled back and the returned promise is rejected.
    * This method provides non-interactive transactions. If you need interactive transactions, please use the transaction method.
    */
-  const batch = async (...args: Params<libSqlTypes.Client["batch"]>) => {
-    return queryHandler(() => client.batch(...args), config);
+  client.batch = async (...args: Params<libSqlTypes.Client["batch"]>) => {
+    return queryHandler(() => batch(...args), config);
   };
 
   /**
@@ -33,7 +37,7 @@ export function createClient(config: LibsqlxConfig): LibsqlxClient {
    * Every statement executed with this method is executed in its own logical database connection.
    * If you want to execute a group of statements in a transaction, use the batch or the * transaction methods.
    */
-  const execute = async (params: libSqlTypes.InStatement & { logQuery?: boolean }) => {
+  client.execute = async (params: libSqlTypes.InStatement & { logQuery?: boolean }) => {
     if (params.logQuery) {
       const fullQueryString = getFullQueryString(params);
       config.onQueryLog?.(fullQueryString);
@@ -44,11 +48,11 @@ export function createClient(config: LibsqlxConfig): LibsqlxClient {
     if (typeof params !== "string") {
       const args = cleanArguments(params.sql, params.args ?? {});
 
-      return queryHandler(() => client.execute({ sql: params.sql, args }), config);
+      return queryHandler(() => execute({ sql: params.sql, args }), config);
     }
 
-    return queryHandler(() => client.execute(params), config);
+    return queryHandler(() => execute(params), config);
   };
 
-  return { ...client, execute, executeMultiple, batch };
+  return client;
 }
