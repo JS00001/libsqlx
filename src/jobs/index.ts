@@ -171,12 +171,11 @@ export class LibsqlxJobs {
       )
     );
 
+    // prettier-ignore
     await this.db.executeMultiple(
       queryString(
-        "CREATE INDEX IF NOT EXISTS idx_" + this.jobsTable + "_priority ON " + this.jobsTable + " (priority);",
-        "CREATE INDEX IF NOT EXISTS idx_" + this.jobsTable + "_status_runAt ON " + this.jobsTable + " (status, runAt);",
+        "CREATE INDEX IF NOT EXISTS idx_" + this.jobsTable + "_status_runAt_priority ON " + this.jobsTable + " (status, runAt, priority DESC);",
         // Prevent multiple cron jobs from getting scheduled for the same dates
-        // prettier-ignore
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_" + this.jobsTable + "_name_cron_runAt ON " + this.jobsTable + " (name, cron, runAt)"
       )
     );
