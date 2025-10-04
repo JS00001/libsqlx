@@ -2,10 +2,17 @@ import fs from "fs/promises";
 import { CliCommandOptions } from "../../types";
 
 import { createClient } from "../../client";
-import { createMigrationTableIfNotExists, logSuccess, logWarn, validateMigrationDirectory } from "../util";
+import { createMigrationTableIfNotExists, logError, logSuccess, logWarn, validateMigrationDirectory } from "../util";
 
 export default async function Up({ url, authToken, migrationPath, migrationTable }: CliCommandOptions) {
-  const db = createClient({ url, authToken });
+  const db = createClient({
+    url,
+    authToken,
+    onQueryError: (err) => {
+      logError(`Something went wrong: ${err}`);
+      process.exit(1);
+    },
+  });
 
   await validateMigrationDirectory(migrationPath);
   await createMigrationTableIfNotExists(db, migrationTable);
@@ -16,7 +23,8 @@ export default async function Up({ url, authToken, migrationPath, migrationTable
 
   const files = await fs.readdir(migrationPath);
   const migrationFiles = files.filter((file) => {
-    return file.endsWith(".ts") && !migratedFiles.includes(file);
+    const fileName = file.split(".")[0];
+    return (file.endsWith(".ts") || file.endsWith(".js")) && !migratedFiles.includes(fileName);
   });
 
   if (!migrationFiles.length) {
@@ -34,10 +42,11 @@ export default async function Up({ url, authToken, migrationPath, migrationTable
   // Apply the migrations
   for (const fileName of migrationFiles) {
     const { default: migration } = await import(`${migrationPath}/${fileName}`);
+    const normalizedFileName = fileName.split(".")[0];
     await migration.up(db);
     await db.execute({
       sql: "INSERT INTO " + migrationTable + "(filepath, timestamp) VALUES (:filepath, :timestamp)",
-      args: { filepath: fileName, timestamp: Date.now() },
+      args: { filepath: normalizedFileName, timestamp: Date.now() },
     });
 
     logSuccess(`Applied migration ${fileName}`);
