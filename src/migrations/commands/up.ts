@@ -10,7 +10,6 @@ export default async function Up({ url, authToken, migrationPath, migrationTable
     authToken,
     onQueryError: (err) => {
       logError(`Something went wrong: ${err}`);
-      process.exit(1);
     },
   });
 

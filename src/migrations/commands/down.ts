@@ -11,7 +11,6 @@ export default async function Down({ url, migrationTable, migrationPath, authTok
     authToken,
     onQueryError: (err) => {
       logError(`Something went wrong: ${err}`);
-      process.exit(1);
     },
   });
 
