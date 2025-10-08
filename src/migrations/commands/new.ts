@@ -29,4 +29,5 @@ export default class Migration_${epochTime}_${name} {
   await writeFile(`${migrationPath}/${fileName}`, fileContents).catch((e) => logError(e.message));
 
   logSuccess(`Created migration ${fileName}`);
+  process.exit(0);
 }

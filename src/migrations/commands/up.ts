@@ -53,4 +53,5 @@ export default async function Up({ url, authToken, migrationPath, migrationTable
   }
 
   logSuccess(`Successfully ran ${migrationFiles.length} migration(s)`);
+  process.exit(0);
 }

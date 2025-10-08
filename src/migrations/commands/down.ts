@@ -49,4 +49,5 @@ export default async function Down({ url, migrationTable, migrationPath, authTok
   });
 
   logSuccess(`Reverted migration ${filepath}`);
+  process.exit(0);
 }
