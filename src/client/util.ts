@@ -1,4 +1,4 @@
-import { LibsqlError, type InStatement } from "@libsql/client";
+import { LibsqlError, Value, type InStatement } from "@libsql/client";
 
 import { LibsqlxConfig } from "../types";
 
@@ -173,4 +173,28 @@ export const toSqliteDateString = (date: Date | string) => {
   const ss = String(date.getUTCSeconds()).padStart(2, "0");
 
   return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+};
+
+/**
+ * Converts a database row to a String or null value
+ */
+export const StringOrNull = (value: Value) => {
+  if (value === null) return null;
+  return String(value);
+};
+
+/**
+ * Converts a column value to a Number or null value
+ */
+export const NumberOrNull = (value: Value) => {
+  if (value === null) return null;
+  return Number(value);
+};
+
+/**
+ * Converts a column value to a Boolean or null value
+ */
+export const BooleanOrNull = (value: Value) => {
+  if (value === null) return null;
+  return Boolean(value);
 };
