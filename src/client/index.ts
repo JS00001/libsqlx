@@ -1,7 +1,8 @@
 import * as libSql from "@libsql/client";
-import type * as libSqlTypes from "@libsql/client";
+import * as libSqlTypes from "@libsql/client";
 
-import type { LibsqlxClient, LibsqlxConfig, Params } from "../types";
+import type { LibsqlxClient, LibsqlxConfig, Transaction, Params } from "../types";
+
 import { cleanArguments, queryHandler, getFullQueryString } from "./util";
 
 export function createClient(config: LibsqlxConfig): LibsqlxClient {
@@ -10,6 +11,7 @@ export function createClient(config: LibsqlxConfig): LibsqlxClient {
   const executeMultiple = client.executeMultiple.bind(client);
   const execute = client.execute.bind(client);
   const batch = client.batch.bind(client);
+  const transaction = client.transaction.bind(client);
 
   /**
    * Execute a sequence of SQL statements separated by semicolons.
@@ -52,6 +54,47 @@ export function createClient(config: LibsqlxConfig): LibsqlxClient {
     }
 
     return queryHandler(() => execute(params), config);
+  };
+
+  /**
+   * Start an interactive transaction.
+   * Interactive transactions allow you to interleave execution of SQL statements with your application logic. They can be used if the batch method is too restrictive, but please note that interactive transactions have higher latency.
+   * The mode parameter selects the transaction mode for the interactive transaction; please see * TransactionMode for details. The default transaction mode is "deferred".
+   * You must make sure that the returned Transaction object is closed, by calling * Transaction.close, Transaction.commit or Transaction.rollback. The best practice is to call Transaction.close in a finally block, as follows:
+   */
+  client.transaction = async (...args: Params<libSqlTypes.Client["transaction"]>) => {
+    const tx = (await transaction(...args)) as Transaction;
+
+    const batch = tx.batch.bind(tx);
+    const execute = tx.execute.bind(tx);
+    const executeMultiple = tx.executeMultiple.bind(tx);
+
+    tx.execute = async (params: libSqlTypes.InStatement & { logQuery?: boolean }) => {
+      if (params.logQuery) {
+        const fullQueryString = getFullQueryString(params);
+        config.onQueryLog?.(fullQueryString);
+      }
+
+      // For all placeholder-based queries, remove arguments that dont have associated placeholders, to prevent
+      // query errors, but allow for simple conditional queries that include placeholders
+      if (typeof params !== "string") {
+        const args = cleanArguments(params.sql, params.args ?? {});
+
+        return queryHandler(() => execute({ sql: params.sql, args }), config);
+      }
+
+      return queryHandler(() => execute(params), config);
+    };
+
+    tx.executeMultiple = async (...args: Params<libSqlTypes.Client["executeMultiple"]>) => {
+      return queryHandler(() => executeMultiple(...args), config);
+    };
+
+    tx.batch = async (...args: Params<libSqlTypes.Client["batch"]>) => {
+      return queryHandler(() => batch(...args), config);
+    };
+
+    return tx;
   };
 
   return client;
