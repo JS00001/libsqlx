@@ -68,12 +68,18 @@ export const getFullQueryString = (params: InStatement) => {
 
   let queryString = params.sql;
 
-  for (const [key, value] of Object.entries(params.args ?? {})) {
-    queryString = queryString.replaceAll(`:${key}`, `'${value}'`);
+  const args = Object.entries(params.args ?? {}).sort(([aKey], [bKey]) => {
+    return bKey.length - aKey.length;
+  });
+
+  for (const [key, value] of args) {
+    const regex = new RegExp(`:${key}\\b`, "g");
+    queryString = queryString.replace(regex, `'${value}'`);
   }
 
   let fullString = "";
   const lines = queryString.split(NEWLINE_CHAR);
+
   for (const line of lines) {
     if (!line.trim()) continue;
     fullString += `${line}\n`;
