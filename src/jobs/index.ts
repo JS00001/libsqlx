@@ -248,7 +248,7 @@ export class LibsqlxJobs {
       args: {
         id,
         attempts,
-        status: JobStatus.Pending,
+        status: JobStatus.Running,
       },
     });
 
