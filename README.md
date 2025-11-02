@@ -226,6 +226,23 @@ await db.execute({
 
 libSQLx provides a few utility functions to make working with libSQL a little easier.
 
+#### `sanitize`
+
+Removes characters from a string that would break a SQL query. This is useful for sanitizing user input to prevent SQL injection attacks.
+
+```ts
+import { sanitize } from "libsqlx";
+
+const userInputtedValue = "foo';--bar";
+
+const sanitizedValue = sanitize(userInputtedValue);
+
+await db.execute(`SELECT * FROM users WHERE name = ${sanitizedValue}`);
+
+// Returns
+("SELECT * FROM users WHERE name = 'foo\\';--bar'")
+```
+
 #### `queryString`
 
 Returns a single string for SQL queries, allowing for better formatting and readability.

@@ -40,6 +40,25 @@ export const paramterize = (key: string, value: Array<string | number>) => {
 };
 
 /**
+ * Sanitizes a string to be used in a SQL query
+ * @remarks
+ * You should still prefer using parameterized queries over string concatenation, but this
+ * is sometimes necessary
+ */
+export const sanitize = (value: string | number | boolean | null | undefined) => {
+  if (value === null || value === undefined) return "NULL";
+  const sanitizedString = String(value)
+    .replace(/\\/g, "\\\\") // backslashes
+    .replace(/\u0008/g, "\\b") // backspace
+    .replace(/\t/g, "\\t") // tab
+    .replace(/\n/g, "\\n") // newline
+    .replace(/\f/g, "\\f") // form feed
+    .replace(/\r/g, "\\r") // carriage return
+    .replace(/'/g, "''"); // single quotes
+  return `'${sanitizedString}'`;
+};
+
+/**
  * Parse a column as JSON, where it is either parsed as an object, or as
  * null
  *
