@@ -174,7 +174,7 @@ export const queryHandler = async <T>(fn: () => T, config: LibsqlxConfig): Promi
     // Specifically handle libsql errors,
     if (err instanceof LibsqlError) {
       config.onQueryError?.(err.message);
-      return null;
+      throw err;
     }
 
     throw err;
