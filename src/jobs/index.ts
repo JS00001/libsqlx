@@ -217,12 +217,12 @@ export class LibsqlxJobs {
               this.activeJobs--;
             });
           }
-
-          setTimeout(loop, this.processEvery);
         }
       } catch (err) {
         console.error(err);
       }
+
+      setTimeout(loop, this.processEvery);
     };
 
     loop();
