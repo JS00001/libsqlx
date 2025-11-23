@@ -25,14 +25,14 @@ export const queryString = (...args: string[]) => {
  * its prepared arguments
  *
  * @example
- * paramterize("id", [1, 2, 3])
+ * parameterize("id", [1, 2, 3])
  * // Returns
  * {
  *   args: { id0: 1, id1: 2, id2: 3 },
  *   placeholders: ":id0, :id1, :id2"
  * }
  */
-export const paramterize = (key: string, value: Array<string | number>) => {
+export const parameterize = (key: string, value: Array<string | number>) => {
   return {
     args: Object.fromEntries(value.map((v, i) => [`${key}${i}`, v])),
     placeholders: value.map((_, i) => `:${key}${i}`).join(", "),

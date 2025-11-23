@@ -16,7 +16,7 @@
   - [Argument Cleaning](#argument-cleaning) - Removing unused arguments
   - [Utility Functions](#utility-functions) - Making working with libSQL easier
     - [queryString](#querystring) - Join a list of strings into a single string
-    - [paramterize](#paramterize) - Take a list and return an object with its sql placeholder names
+    - [parameterize](#parameterize) - Take a list and return an object with its sql placeholder names
     - [Jsonify](#jsonify) - Convert a string to a JSON object
     - [sanitizeLike](#sanitizelike) - Sanitize a string to remove characters that would break glob patterns
     - [sanitizeSqlPath](#sanitizesqlpath) - Fully sanitize a string down to only alphanumeric characters
@@ -259,14 +259,14 @@ await db.execute({
 ("SELECT * FROM users WHERE id = :id");
 ```
 
-#### `paramterize`
+#### `parameterize`
 
 Takes an array of values and returns an object with its sql placeholder names, and its prepared arguments. Perfect for `IN (...)` queries.
 
 ```ts
-import { paramterize } from "libsqlx";
+import { parameterize } from "libsqlx";
 
-const { args, placeholders } = paramterize("id", [1, 2, 3]);
+const { args, placeholders } = parameterize("id", [1, 2, 3]);
 
 await db.execute({
   sql: queryString("SELECT * FROM users WHERE id IN (", placeholders, ")"),
