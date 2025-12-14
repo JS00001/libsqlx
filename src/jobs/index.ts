@@ -197,15 +197,24 @@ export class LibsqlxJobs {
 
           const result = await this.db.execute({
             sql: queryString(
-              "SELECT *",
-              "FROM " + this.jobsTable,
-              "WHERE status = :status AND runAt <= CURRENT_TIMESTAMP",
-              "ORDER BY priority DESC, runAt ASC",
-              "LIMIT :limit"
+              "UPDATE jobs",
+              "SET status = :runningStatus,",
+              "  attempts = attempts + 1,",
+              "  updatedAt = CURRENT_TIMESTAMP",
+              "WHERE id IN (",
+              "  SELECT id",
+              "  FROM jobs",
+              "  WHERE status = :pendingStatus",
+              "    AND runAt <= CURRENT_TIMESTAMP",
+              "  ORDER BY priority DESC, runAt ASC",
+              "  LIMIT :limit",
+              ")",
+              "RETURNING *"
             ),
             args: {
-              status: JobStatus.Pending,
               limit,
+              pendingStatus: JobStatus.Pending,
+              runningStatus: JobStatus.Running,
             },
           });
 
@@ -231,26 +240,13 @@ export class LibsqlxJobs {
   private async processJob(row: Row) {
     const id = Number(row["id"]);
     const name = String(row["name"]);
-    const attempts = Number(row["attempts"]) + 1;
+    const attempts = Number(row["attempts"]);
 
     const cron = row["cron"] ? String(row["cron"]) : null;
     const data = row["data"] ? Jsonify(String(row["data"])) : null;
 
     const job = this.jobsRegistry[name];
     if (!job) return console.error(`Job ${name} does not exist`);
-
-    await this.db.execute({
-      sql: queryString(
-        "UPDATE " + this.jobsTable,
-        "SET status = :status, attempts = :attempts, updatedAt = CURRENT_TIMESTAMP",
-        "WHERE id = :id"
-      ),
-      args: {
-        id,
-        attempts,
-        status: JobStatus.Running,
-      },
-    });
 
     try {
       await Promise.resolve(job.fn(data));
@@ -263,7 +259,7 @@ export class LibsqlxJobs {
         },
       });
 
-      //  If this is a cronjob, schedule the next run
+      // If this is a cronjob, schedule the next run
       if (cron) {
         const interval = parser.parse(cron);
         const nextRun = interval.next().toDate();
