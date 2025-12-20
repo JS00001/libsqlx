@@ -50,7 +50,7 @@ export default async function Up({ url, authToken, migrationPath, migrationTable
     const normalizedFileName = fileName.split(".")[0];
 
     // Run the migration
-    const transaction = await db.transaction();
+    const transaction = await db.transaction("write");
 
     await migration
       .up(transaction)
