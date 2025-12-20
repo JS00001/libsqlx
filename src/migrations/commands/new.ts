@@ -15,11 +15,11 @@ export default async function New({ name, migrationPath }: NewCommandOptions) {
 import type { Transaction } from 'libsqlx';
 
 export default class Migration_${epochTime}_${name} {
-  public static async up(db: Transaction) {
+  public static async up(tx: Transaction) {
     // Add your migration logic here
   }
 
-  public static async down(db: Transaction) {
+  public static async down(tx: Transaction) {
     // Add your rollback logic here
   }
 }

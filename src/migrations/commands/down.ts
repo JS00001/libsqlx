@@ -1,9 +1,10 @@
 import fs from "fs/promises";
 
-import { CliCommandOptions } from "../../types";
-import { createMigrationTableIfNotExists, logError, logSuccess, validateMigrationDirectory } from "../util";
+import type { MigrationFile } from "..";
+import type { CliCommandOptions } from "../../types";
 
 import { createClient } from "../../client";
+import { createMigrationTableIfNotExists, logError, logSuccess, validateMigrationDirectory } from "../util";
 
 export default async function Down({ url, migrationTable, migrationPath, authToken }: CliCommandOptions) {
   const db = createClient({
@@ -40,9 +41,17 @@ export default async function Down({ url, migrationTable, migrationPath, authTok
     process.exit(0);
   }
 
-  const { default: migration } = await import(`${migrationPath}/${matchingFile[0]}`);
+  const migration: MigrationFile = (await import(`${migrationPath}/${matchingFile[0]}`)).default;
 
-  await migration.down(db);
+  // Run the migration
+  const transaction = await db.transaction("write");
+
+  await migration
+    .down(transaction)
+    .then(() => transaction.commit())
+    .catch(() => transaction.rollback());
+
+  // Store the migration data
   await db.execute({
     sql: "DELETE FROM " + migrationTable + " WHERE id = :id",
     args: { id },

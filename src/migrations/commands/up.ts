@@ -1,13 +1,10 @@
 import fs from "fs/promises";
-import { CliCommandOptions, Transaction } from "../../types";
+import { CliCommandOptions } from "../../types";
+
+import type { MigrationFile } from "..";
 
 import { createClient } from "../../client";
 import { createMigrationTableIfNotExists, logError, logSuccess, logWarn, validateMigrationDirectory } from "../util";
-
-interface MigrationFile {
-  up: (db: Transaction) => Promise<void>;
-  down: (db: Transaction) => Promise<void>;
-}
 
 export default async function Up({ url, authToken, migrationPath, migrationTable }: CliCommandOptions) {
   const db = createClient({

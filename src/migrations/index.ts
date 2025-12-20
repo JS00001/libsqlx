@@ -4,8 +4,13 @@ import Up from "./commands/up";
 import New from "./commands/new";
 import Down from "./commands/down";
 
-import { CliCommandOptions } from "../types";
 import packageJSON from "../../package.json";
+import { CliCommandOptions, Transaction } from "../types";
+
+export interface MigrationFile {
+  up: (db: Transaction) => Promise<void>;
+  down: (db: Transaction) => Promise<void>;
+}
 
 export function createLibsqlxMigrationCli(props: CliCommandOptions) {
   props.migrationTable = props.migrationTable ?? "migrations";

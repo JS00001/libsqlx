@@ -91,11 +91,15 @@ createLibsqlxMigrationCli({
 }
 ````
 
-4. To create a new migration, run `npm run migrate new --name "create_users_table"`
+4. To create a new migration, run `npm run migrate new --name "update_users_table"`
 
-5. To run migrations, run `npm run migrate up`
+5. The migration will be created in a file named: `<timestamp>_<name>.ts` e.g. `1766236438767_update_users_table`
 
-6. To rollback migrations, run `npm run migrate down`
+6. Within the file, fill in the code for the `up` and `down` method. Notice that a database transaction is passed to both methods, so that you can run queries within them.
+
+7. To run migrations, run `npm run migrate up`
+
+8. To rollback migrations, run `npm run migrate down`
 
 Thats it!
 
