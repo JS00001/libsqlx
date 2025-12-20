@@ -72,7 +72,7 @@ libSQLx provides a simple way to manage database migrations. It can be used to a
 1. Create a `migrations/index.ts` file in your project
 2. Adding the following to your `migrations/index.ts` file will allow you to use the libSQLx migration cli.
 
-````ts
+```ts
 import { createLibsqlxMigrationCli } from "libsqlx";
 
 createLibsqlxMigrationCli({
