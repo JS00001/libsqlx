@@ -251,7 +251,16 @@ Returns a single string for SQL queries, allowing for better formatting and read
 import { queryString } from "libsqlx";
 
 await db.execute({
-  sql: queryString("SELECT firstName, lastName", "FROM users", "WHERE id = :id", "  AND email = :email"),
+  sql: queryString(
+    "SELECT",
+    "  email,",   
+    "  lastName,",
+    "  firstName",
+    "FROM users", 
+    "LEFT JOIN addresses ON users.id = addresses.user_id",
+    "WHERE id = :id", 
+    "  AND email = :email"
+  ),
   args: { id: 1, email: "johndoe@gmail.com" },
 });
 
