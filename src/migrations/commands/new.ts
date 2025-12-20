@@ -12,14 +12,14 @@ export default async function New({ name, migrationPath }: NewCommandOptions) {
   const fileName = `${epochTime}_${name}.ts`;
 
   const fileContents = `
-import type { LibsqlxClient } from 'libsqlx';
+import type { Transaction } from 'libsqlx';
 
 export default class Migration_${epochTime}_${name} {
-  public static async up(db: LibsqlxClient) {
+  public static async up(db: Transaction) {
     // Add your migration logic here
   }
 
-  public static async down(db: LibsqlxClient) {
+  public static async down(db: Transaction) {
     // Add your rollback logic here
   }
 }

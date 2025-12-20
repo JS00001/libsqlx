@@ -1,8 +1,13 @@
 import fs from "fs/promises";
-import { CliCommandOptions } from "../../types";
+import { CliCommandOptions, Transaction } from "../../types";
 
 import { createClient } from "../../client";
 import { createMigrationTableIfNotExists, logError, logSuccess, logWarn, validateMigrationDirectory } from "../util";
+
+interface MigrationFile {
+  up: (db: Transaction) => Promise<void>;
+  down: (db: Transaction) => Promise<void>;
+}
 
 export default async function Up({ url, authToken, migrationPath, migrationTable }: CliCommandOptions) {
   const db = createClient({
@@ -41,9 +46,18 @@ export default async function Up({ url, authToken, migrationPath, migrationTable
 
   // Apply the migrations
   for (const fileName of migrationFiles) {
-    const { default: migration } = await import(`${migrationPath}/${fileName}`);
+    const migration: MigrationFile = (await import(`${migrationPath}/${fileName}`)).default;
     const normalizedFileName = fileName.split(".")[0];
-    await migration.up(db);
+
+    // Run the migration
+    const transaction = await db.transaction();
+
+    await migration
+      .up(transaction)
+      .then(() => transaction.commit())
+      .catch(() => transaction.rollback());
+
+    // Store the migration data
     await db.execute({
       sql: "INSERT INTO " + migrationTable + "(filepath, timestamp) VALUES (:filepath, :timestamp)",
       args: { filepath: normalizedFileName, timestamp: Date.now() },
