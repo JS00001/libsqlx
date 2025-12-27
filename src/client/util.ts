@@ -16,7 +16,7 @@ const NEWLINE_CHAR = "\t";
  * // Returns
  * "SELECT * FROM users WHERE id = :id"
  */
-export const queryString = (...args: (string | boolean)[]) => {
+export const queryString = (...args: (string | boolean | undefined)[]) => {
   const filteredArgs = args.filter(Boolean);
   return filteredArgs.join(NEWLINE_CHAR);
 };
