@@ -143,7 +143,9 @@ export const sanitizeSqlPath = (str: string) => {
  */
 export const cleanArguments = (sql: string, args: Record<string, any>) => {
   for (const key in args) {
-    if (!sql.includes(`:${key}`)) {
+    const pattern = new RegExp(`:${key}(?![a-zA-Z0-9_])`);
+
+    if (!pattern.test(sql)) {
       delete args[key];
     }
   }
