@@ -10,6 +10,7 @@ interface JobRegistryValue {
   name: string;
   options: JobOptions;
   fn: (data: any) => void;
+  onFailure?: (data: any) => void;
 }
 
 export class LibsqlxJobs {
@@ -67,9 +68,10 @@ export class LibsqlxJobs {
   public register<T extends Record<string, any> = Record<string, any>>(
     name: string,
     options: JobOptions,
-    fn: (data: T) => void
+    fn: (data: T) => void,
+    onFailure?: (data: T) => void
   ) {
-    this.jobsRegistry[name] = { name, options, fn };
+    this.jobsRegistry[name] = { name, options, fn, onFailure };
   }
 
   /**
@@ -171,12 +173,11 @@ export class LibsqlxJobs {
       )
     );
 
-    // prettier-ignore
     await this.db.executeMultiple(
       queryString(
-        "CREATE INDEX IF NOT EXISTS idx_" + this.jobsTable + "_status_runAt_priority ON " + this.jobsTable + " (status, runAt, priority DESC);",
+        `CREATE INDEX IF NOT EXISTS idx_${this.jobsTable}_status_runAt_priority ON ${this.jobsTable} (status, runAt, priority DESC);`,
         // Prevent multiple cron jobs from getting scheduled for the same dates
-        "CREATE UNIQUE INDEX IF NOT EXISTS idx_" + this.jobsTable + "_name_cron_runAt ON " + this.jobsTable + " (name, cron, runAt)"
+        `CREATE UNIQUE INDEX IF NOT EXISTS idx_${this.jobsTable}_name_cron_runAt ON ${this.jobsTable} (name, cron, runAt)`
       )
     );
   }
@@ -246,7 +247,7 @@ export class LibsqlxJobs {
     const data = row["data"] ? Jsonify(String(row["data"])) : null;
 
     const job = this.jobsRegistry[name];
-    if (!job) return console.error(`Job ${name} does not exist`);
+    if (!job) return;
 
     try {
       await Promise.resolve(job.fn(data));
@@ -280,13 +281,16 @@ export class LibsqlxJobs {
         });
       }
     } catch (err) {
+      const updatedStatus = attempts >= this.maxRetries ? JobStatus.Failed : JobStatus.Pending;
+
       await this.db.execute({
         sql: queryString("UPDATE " + this.jobsTable, "SET status = :status, updatedAt = CURRENT_TIMESTAMP", "WHERE id = :id"),
-        args: {
-          id,
-          status: attempts >= this.maxRetries ? JobStatus.Failed : JobStatus.Pending,
-        },
+        args: { id, status: updatedStatus },
       });
+
+      if (updatedStatus === JobStatus.Failed && job.onFailure) {
+        await Promise.resolve(job.onFailure(err));
+      }
     }
   }
 }
