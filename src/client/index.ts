@@ -8,10 +8,10 @@ import { cleanArguments, queryHandler, getFullQueryString } from "./util";
 export function createClient(config: LibsqlxConfig): LibsqlxClient {
   const client = libSql.createClient(config) as LibsqlxClient;
 
-  const executeMultiple = client.executeMultiple.bind(client);
   const execute = client.execute.bind(client);
   const batch = client.batch.bind(client);
   const transaction = client.transaction.bind(client);
+  const executeMultiple = client.executeMultiple.bind(client);
 
   /**
    * Execute a sequence of SQL statements separated by semicolons.

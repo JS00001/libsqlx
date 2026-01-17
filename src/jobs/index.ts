@@ -69,7 +69,7 @@ export class LibsqlxJobs {
     name: string,
     options: JobOptions,
     fn: (data: T) => void,
-    onFailure?: (data: T) => void
+    onFailure?: (data: T) => void,
   ) {
     this.jobsRegistry[name] = { name, options, fn, onFailure };
   }
@@ -86,7 +86,7 @@ export class LibsqlxJobs {
       sql: queryString(
         "INSERT INTO " + this.jobsTable,
         "(name, data, runAt, priority)",
-        "VALUES (:name, :data, CURRENT_TIMESTAMP, :priority)"
+        "VALUES (:name, :data, CURRENT_TIMESTAMP, :priority)",
       ),
       args: {
         name: job.name,
@@ -111,7 +111,7 @@ export class LibsqlxJobs {
       sql: queryString(
         "INSERT INTO " + this.jobsTable,
         "(name, data, runAt, priority)",
-        "VALUES (:name, :data, :runAt, :priority)"
+        "VALUES (:name, :data, :runAt, :priority)",
       ),
       args: {
         name: job.name,
@@ -136,7 +136,7 @@ export class LibsqlxJobs {
       sql: queryString(
         "INSERT OR IGNORE INTO " + this.jobsTable,
         "(name, data, runAt, priority, cron)",
-        "VALUES (:name, :data, :runAt, :priority, :cron)"
+        "VALUES (:name, :data, :runAt, :priority, :cron)",
       ),
       args: {
         name: job.name,
@@ -169,16 +169,16 @@ export class LibsqlxJobs {
         "  status TEXT CHECK (status IN ( " + jobStatuses + ")) DEFAULT '" + JobStatus.Pending + "',",
         "  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,",
         "  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP",
-        ")"
-      )
+        ")",
+      ),
     );
 
     await this.db.executeMultiple(
       queryString(
         `CREATE INDEX IF NOT EXISTS idx_${this.jobsTable}_status_runAt_priority ON ${this.jobsTable} (status, runAt, priority DESC);`,
         // Prevent multiple cron jobs from getting scheduled for the same dates
-        `CREATE UNIQUE INDEX IF NOT EXISTS idx_${this.jobsTable}_name_cron_runAt ON ${this.jobsTable} (name, cron, runAt)`
-      )
+        `CREATE UNIQUE INDEX IF NOT EXISTS idx_${this.jobsTable}_name_cron_runAt ON ${this.jobsTable} (name, cron, runAt)`,
+      ),
     );
   }
 
@@ -210,7 +210,7 @@ export class LibsqlxJobs {
               "  ORDER BY priority DESC, runAt ASC",
               "  LIMIT :limit",
               ")",
-              "RETURNING *"
+              "RETURNING *",
             ),
             args: {
               limit,
@@ -267,9 +267,9 @@ export class LibsqlxJobs {
 
         await this.db.execute({
           sql: queryString(
-            "INSERT INTO " + this.jobsTable,
+            "INSERT OR IGNORE INTO " + this.jobsTable,
             "(name, data, runAt, priority, cron)",
-            "VALUES (:name, :data, :runAt, :priority, :cron)"
+            "VALUES (:name, :data, :runAt, :priority, :cron)",
           ),
           args: {
             cron,
