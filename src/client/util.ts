@@ -55,7 +55,7 @@ export const parameterizePrimitiveArray = (key: string, value: Array<string | nu
 export const parameterizeComplexArray = <T>(value: T[], fields: (keyof T)[]) => {
   const placeholders = value.map((_, i) => `(${fields.map((field) => `:${String(field)}${i}`).join(",")})`).join(", ");
   const args = value.reduce((acc, item, i) => {
-    return { ...acc, ...Object.fromEntries(fields.map((field) => [`${String(field)}${i}`, item[field]])) };
+    return { ...acc, ...Object.fromEntries(fields.map((field) => [`${String(field)}${i}`, item[field] ?? null])) };
   }, {});
 
   return { args, placeholders };
