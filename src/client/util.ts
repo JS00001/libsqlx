@@ -33,11 +33,32 @@ export const queryString = (...args: (string | boolean | undefined)[]) => {
  *   placeholders: ":id0, :id1, :id2"
  * }
  */
-export const parameterize = (key: string, value: Array<string | number>) => {
+export const parameterizePrimitiveArray = (key: string, value: Array<string | number>) => {
   return {
     args: Object.fromEntries(value.map((v, i) => [`${key}${i}`, v])),
     placeholders: value.map((_, i) => `:${key}${i}`).join(", "),
   };
+};
+
+/**
+ * Take an array of objects and extract specific fields as needed to be used
+ * as placeholders, and prepared arguments
+ *
+ * @example
+ * parameterizeComplexArray([{ id: 1, name: "foo" }, { id: 2, name: "bar" }], ["id", "name"])
+ * // Returns
+ * {
+ *   args: { id0: 1, name0: "foo", id1: 2, name1: "bar" },
+ *   placeholders: "(:id0, :name0), (:id1, :name1)"
+ * }
+ */
+export const parameterizeComplexArray = <T>(value: T[], fields: (keyof T)[]) => {
+  const placeholders = value.map((_, i) => `(${fields.map((field) => `:${String(field)}${i}`).join(",")})`).join(", ");
+  const args = value.reduce((acc, item, i) => {
+    return { ...acc, ...Object.fromEntries(fields.map((field) => [`${String(field)}${i}`, item[field]])) };
+  }, {});
+
+  return { args, placeholders };
 };
 
 /**

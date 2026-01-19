@@ -272,19 +272,40 @@ await db.execute({
 ("SELECT * FROM users WHERE id = :id");
 ```
 
-#### `parameterize`
+#### `parameterizePrimitiveArray`
 
 Takes an array of values and returns an object with its sql placeholder names, and its prepared arguments. Perfect for `IN (...)` queries.
 
 ```ts
-import { parameterize } from "libsqlx";
+import { parameterizePrimitiveArray } from "libsqlx";
 
-const { args, placeholders } = parameterize("id", [1, 2, 3]);
+const { args, placeholders } = parameterizePrimitiveArray("id", [1, 2, 3]);
 
 await db.execute({
   sql: queryString("SELECT * FROM users WHERE id IN (", placeholders, ")"),
   args: args,
 });
+```
+
+#### `parameterizeComplexArray`
+
+Takes an array of objects (all of the same shape) and returns an object with its sql placeholder names, and its prepared arguments. Perfect for `INSERT` queries.
+
+```ts
+import { parameterizeComplexArray } from "libsqlx";
+
+const { args, placeholders } = parameterizeComplexArray(
+  [
+    { id: 1, name: "John", role: "admin" },
+    { id: 2, name: "Jane", role: "user" },
+  ],
+  ["id", "name", "role"]
+);
+
+await db.execute({
+  sql: "INSERT INTO users (id, name, role) VALUES (" + placeholders + ")",
+  args: args,
+})
 ```
 
 #### `Jsonify`
