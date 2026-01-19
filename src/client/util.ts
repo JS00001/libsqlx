@@ -28,16 +28,18 @@ export const queryString = (...args: (string | boolean | undefined)[]) => {
  * @example
  * parameterize("id", [1, 2, 3])
  * // Returns
- * {
- *   args: { id0: 1, id1: 2, id2: 3 },
- *   placeholders: ":id0, :id1, :id2"
- * }
+ * [
+ *   // Placeholders
+ *   ':id0, :id1, :id2',
+ *   // Args
+ *   { id0: 1, id1: 2, id2: 3 }
+ * ]
  */
 export const parameterizePrimitiveArray = (key: string, value: Array<string | number>) => {
-  return {
-    args: Object.fromEntries(value.map((v, i) => [`${key}${i}`, v])),
-    placeholders: value.map((_, i) => `:${key}${i}`).join(", "),
-  };
+  const args = Object.fromEntries(value.map((v, i) => [`${key}${i}`, v]));
+  const placeholders = value.map((_, i) => `:${key}${i}`).join(", ");
+
+  return [placeholders, args] as const;
 };
 
 /**
@@ -47,10 +49,12 @@ export const parameterizePrimitiveArray = (key: string, value: Array<string | nu
  * @example
  * parameterizeComplexArray([{ id: 1, name: "foo" }, { id: 2, name: "bar" }], ["id", "name"])
  * // Returns
- * {
- *   args: { id0: 1, name0: "foo", id1: 2, name1: "bar" },
- *   placeholders: "(:id0, :name0), (:id1, :name1)"
- * }
+ * [
+ *   // Placeholders
+ *   '(:id0, :name0), (:id1, :name1)',
+ *   // Args
+ *   { id0: 1, name0: "foo", id1: 2, name1: "bar" }
+ * ]
  */
 export const parameterizeComplexArray = <T>(value: T[], fields: (keyof T)[]) => {
   const placeholders = value.map((_, i) => `(${fields.map((field) => `:${String(field)}${i}`).join(",")})`).join(", ");
@@ -58,7 +62,7 @@ export const parameterizeComplexArray = <T>(value: T[], fields: (keyof T)[]) => 
     return { ...acc, ...Object.fromEntries(fields.map((field) => [`${String(field)}${i}`, item[field] ?? null])) };
   }, {});
 
-  return { args, placeholders };
+  return [placeholders, args] as const;
 };
 
 /**

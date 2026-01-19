@@ -279,7 +279,7 @@ Takes an array of values and returns an object with its sql placeholder names, a
 ```ts
 import { parameterizePrimitiveArray } from "libsqlx";
 
-const { args, placeholders } = parameterizePrimitiveArray("id", [1, 2, 3]);
+const [placeholders, args] = parameterizePrimitiveArray("id", [1, 2, 3]);
 
 await db.execute({
   sql: queryString("SELECT * FROM users WHERE id IN (", placeholders, ")"),
@@ -294,7 +294,7 @@ Takes an array of objects (all of the same shape) and returns an object with its
 ```ts
 import { parameterizeComplexArray } from "libsqlx";
 
-const { args, placeholders } = parameterizeComplexArray(
+const [placeholders, args] = parameterizeComplexArray(
   [
     { id: 1, name: "John", role: "admin" },
     { id: 2, name: "Jane", role: "user" },
